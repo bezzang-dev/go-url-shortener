@@ -1,0 +1,19 @@
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+main  # 우리가 go build 하면 생기는 기본 파일명
+url-shortener # 혹은 프로젝트 이름으로 된 실행파일
+
+.env
+.env.local
+
+.idea/
+.vscode/
+*.swp
+
+.DS_Store
+Thumbs.db
+
+vendor/
