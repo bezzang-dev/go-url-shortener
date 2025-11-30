@@ -11,6 +11,12 @@ type urlRepository struct {
 	db *gorm.DB
 }
 
+func NewURLRepository(db *gorm.DB) domain.URLRepository {
+	return &urlRepository{
+		db: db,
+	}
+}
+
 // GetByShortCode implements domain.URLRepository.
 func (u *urlRepository) GetByShortCode(code string) (*domain.URL, error) {
 	var url domain.URL
@@ -35,10 +41,4 @@ func (u *urlRepository) Save(url *domain.URL) error {
 		return result.Error
 	}
 	return nil
-}
-
-func NewURLRepository(db *gorm.DB) domain.URLRepository {
-	return &urlRepository{
-		db: db,
-	}
 }
