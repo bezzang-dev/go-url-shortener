@@ -1,6 +1,9 @@
 package domain
 
-import "time"
+import (
+	"context"
+	"time"
+)
 
 type URL struct {
 	ID uint `gorm:"primaryKey" json:"-"`
@@ -10,6 +13,6 @@ type URL struct {
 }
 
 type URLRepository interface {
-	Save(url *URL) error
-	GetByShortCode(code string) (*URL, error)
+	Save(ctx context.Context, url *URL) error
+	GetByShortCode(ctx context.Context, code string) (*URL, error)
 }

@@ -31,7 +31,7 @@ func (h *URLHandler) CreateShortURL(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 	}
 
-	url, err := h.service.GenerateShortURL(req.OriginalURL)
+	url, err := h.service.GenerateShortURL(c.Request.Context(), req.OriginalURL)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to generate short URL"})
 		return
@@ -46,7 +46,7 @@ func (h *URLHandler) CreateShortURL(c *gin.Context) {
 func (h *URLHandler) RedirectToOriginal(c *gin.Context) {
 	shortCode := c.Param("shortCode")
 
-	originalURL, err := h.service.GetOriginalURL(shortCode)
+	originalURL, err := h.service.GetOriginalURL(c.Request.Context(), shortCode)
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "URL not found"})
 	}

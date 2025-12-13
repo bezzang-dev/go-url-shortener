@@ -1,6 +1,7 @@
 package service
 
 import (
+	"context"
 	"crypto/rand"
 	"math/big"
 	"strings"
@@ -20,7 +21,7 @@ func NewURLService(repo domain.URLRepository) *URLService {
 	}
 }
 
-func (s *URLService) GenerateShortURL(originalURL string) (*domain.URL, error) {
+func (s *URLService) GenerateShortURL(ctx context.Context, originalURL string) (*domain.URL, error) {
 
 	shortCode, err := generateRandomString(6)
 	if err != nil {
@@ -32,15 +33,15 @@ func (s *URLService) GenerateShortURL(originalURL string) (*domain.URL, error) {
 		ShortCode: shortCode,
 	}
 
-	if err := s.repo.Save(url); err != nil {
+	if err := s.repo.Save(ctx, url); err != nil {
 		return nil, err
 	}
 
 	return url, nil
 }
 
-func (s *URLService) GetOriginalURL(shortCode string) (string, error) {
-	url, err := s.repo.GetByShortCode(shortCode)
+func (s *URLService) GetOriginalURL(ctx context.Context, shortCode string) (string, error) {
+	url, err := s.repo.GetByShortCode(ctx, shortCode)
 	if err != nil {
 		return "", err
 	}

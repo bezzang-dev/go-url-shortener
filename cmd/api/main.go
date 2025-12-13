@@ -8,6 +8,7 @@ import (
 	"github.com/bezzang-dev/go-url-shortener/internal/repository"
 	"github.com/bezzang-dev/go-url-shortener/internal/service"
 	"github.com/gin-gonic/gin"
+	"github.com/redis/go-redis/v9"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
@@ -16,6 +17,12 @@ import (
 func main() {
 
 	dsn := "host=localhost user=postgres password=postgres dbname=shortener port=5432 sslmode=disable TimeZone=Asia/Seoul"
+
+	rdb := redis.NewClient(&redis.Options{
+		Addr: "localhost:6379",
+		Password: "",
+		DB: 0,
+	})
 
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{
 		Logger: logger.Default.LogMode(logger.Info),
@@ -28,7 +35,7 @@ func main() {
 		log.Fatal("Failed to migrate database:", err)
 	}
 
-	repo := repository.NewURLRepository(db)
+	repo := repository.NewURLRepository(db, rdb)
 	svc := service.NewURLService(repo)
 	h := handler.NewURLHandler(svc)
 

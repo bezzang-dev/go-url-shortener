@@ -1,6 +1,7 @@
 package service
 
 import (
+	"context"
 	"testing"
 
 	"github.com/bezzang-dev/go-url-shortener/internal/domain"
@@ -12,12 +13,12 @@ type MockURLRepository struct {
 	mock.Mock
 }
 
-func (m *MockURLRepository) Save(url *domain.URL) error {
+func (m *MockURLRepository) Save(ctx context.Context, url *domain.URL) error {
 	args := m.Called(url)
 	return args.Error(0)
 }
 
-func (m *MockURLRepository) GetByShortCode(code string) (*domain.URL, error) {
+func (m *MockURLRepository) GetByShortCode(ctx context.Context, code string) (*domain.URL, error) {
 	args := m.Called(code)
 	if args.Get(0) == nil {
 		return nil, args.Error(1)
@@ -30,10 +31,12 @@ func TestGenerateShortUrl(t *testing.T) {
 	svc := NewURLService(mockRepo)
 	originalURL := "https://www.naver.com"
 
-	mockRepo.On("Save", mock.Anything).Return(nil)
+	ctx := context.Background()
+
+	mockRepo.On("Save", mock.Anything, mock.Anything).Return(nil)
 
 	// when
-	result, err := svc.GenerateShortURL(originalURL)
+	result, err := svc.GenerateShortURL(ctx, originalURL)
 
 	// then
 	assert.NoError(t, err)
@@ -51,6 +54,8 @@ func TestGetOriginalURL(t *testing.T) {
 	shortCode := "AbC12z"
 	expectedURL := "https://www.google.com"
 
+	ctx := context.Background()
+
 	mockURL := &domain.URL{
 		Original: expectedURL,
 		ShortCode: shortCode,
@@ -58,7 +63,7 @@ func TestGetOriginalURL(t *testing.T) {
 
 	mockRepo.On("GetByShortCode", shortCode).Return(mockURL, nil)
 
-	resultStr, err := svc.GetOriginalURL(shortCode)
+	resultStr, err := svc.GetOriginalURL(ctx, shortCode)
 
 	assert.NoError(t, err)
 	assert.Equal(t, expectedURL, resultStr)
