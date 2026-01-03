@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 
+	"github.com/bezzang-dev/go-url-shortener/internal/analytics"
 	"github.com/bezzang-dev/go-url-shortener/internal/domain"
 	"github.com/bezzang-dev/go-url-shortener/internal/handler"
 	"github.com/bezzang-dev/go-url-shortener/internal/repository"
@@ -35,9 +36,15 @@ func main() {
 		log.Fatal("Failed to migrate database:", err)
 	}
 
+	analyticsClient, err := analytics.NewClient("localhost:50051")
+	if err != nil {
+		log.Fatalf("Failed to connect to analytics service: %v", err)
+	}
+	defer analyticsClient.Close()
+
 	repo := repository.NewURLRepository(db, rdb)
 	svc := service.NewURLService(repo)
-	h := handler.NewURLHandler(svc)
+	h := handler.NewURLHandler(svc, analyticsClient)
 
 	r := gin.Default()
 

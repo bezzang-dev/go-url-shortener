@@ -3,16 +3,18 @@ package handler
 import (
 	"net/http"
 
+	"github.com/bezzang-dev/go-url-shortener/internal/analytics"
 	"github.com/bezzang-dev/go-url-shortener/internal/service"
 	"github.com/gin-gonic/gin"
 )
 
 type URLHandler struct {
 	service *service.URLService
+	analytics *analytics.Client
 }
 
-func NewURLHandler(s *service.URLService) *URLHandler {
-	return &URLHandler{service: s}
+func NewURLHandler(s *service.URLService, analytics *analytics.Client) *URLHandler {
+	return &URLHandler{service: s, analytics: analytics}
 }
 
 type CreateShortURLRequest struct {
@@ -51,6 +53,11 @@ func (h *URLHandler) RedirectToOriginal(c *gin.Context) {
 		c.JSON(http.StatusNotFound, gin.H{"error": "URL not found"})
 	}
 
-	c.Redirect(http.StatusMovedPermanently, originalURL)
+	h.analytics.LogAccessAsync(
+		shortCode,
+		c.ClientIP(),
+		c.Request.UserAgent(),
+	)
 
+	c.Redirect(http.StatusMovedPermanently, originalURL)
 }
